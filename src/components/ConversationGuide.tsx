@@ -7,13 +7,18 @@ import { Label } from "@/components/ui/label";
 
 type SubGuide = {
   title: string;
+  titleEs: string;
   questions: string[];
+  questionsEs: string[];
 };
 
 type Guide = {
   title: string;
+  titleEs: string;
   description: string;
+  descriptionEs: string;
   questions?: string[];
+  questionsEs?: string[];
   subGuides?: {
     [key: string]: SubGuide;
   };
@@ -25,22 +30,26 @@ type Guides = {
       [key: string]: SubGuide;
     };
   };
-  casual: Guide & { questions: string[] };
-  professional: Guide & { questions: string[] };
-  cultural: Guide & { questions: string[] };
+  casual: Guide & { questions: string[]; questionsEs: string[] };
+  professional: Guide & { questions: string[]; questionsEs: string[] };
+  cultural: Guide & { questions: string[]; questionsEs: string[] };
 };
 
 const ConversationGuide = () => {
   const [selectedGuide, setSelectedGuide] = useState<keyof Guides>('casual');
   const [selectedSubGuide, setSelectedSubGuide] = useState<string>('general');
+  const [language, setLanguage] = useState<'en' | 'es'>('en');
 
   const guides: Guides = {
     latinAmerica: {
       title: "Latin American Cultural Connection",
+      titleEs: "Conexión Cultural Latinoamericana",
       description: "Culturally attuned conversation starters for Latin American students",
+      descriptionEs: "Iniciadores de conversación culturalmente adaptados para estudiantes latinoamericanos",
       subGuides: {
         general: {
           title: "General Latin American",
+          titleEs: "Latinoamérica General",
           questions: [
             "¡Bienvenido/a! What part of Latin America are you from?",
             "What's your favorite local celebration or festival from your hometown?",
@@ -52,10 +61,23 @@ const ConversationGuide = () => {
             "What's the biggest difference in daily life here compared to home?",
             "Do you stay in touch with family through video calls?",
             "What work or study experience do you have from back home?"
+          ],
+          questionsEs: [
+            "¡Bienvenido/a! ¿De qué parte de Latinoamérica eres?",
+            "¿Cuál es tu celebración o festival local favorito de tu ciudad natal?",
+            "¿Encuentras similitudes entre tu ciudad natal y esta ciudad?",
+            "¿Qué comidas de casa extrañas más?",
+            "¿Tienes familiares que hayan estudiado inglés antes?",
+            "¿Qué tipo de música te gusta? ¿Te gusta la música regional?",
+            "¿Has encontrado buenos restaurantes o mercados latinoamericanos aquí?",
+            "¿Cuál es la mayor diferencia en la vida diaria aquí comparada con tu hogar?",
+            "¿Mantienes contacto con tu familia a través de videollamadas?",
+            "¿Qué experiencia de trabajo o estudio tienes de tu país?"
           ]
         },
         mexico: {
           title: "Mexican Cultural Connection",
+          titleEs: "Conexión Cultural Mexicana",
           questions: [
             "¡Bienvenido/a! Which state in Mexico are you from?",
             "Is your hometown more of a ciudad or pueblo? What's it known for?",
@@ -67,10 +89,23 @@ const ConversationGuide = () => {
             "Do you follow soccer? Which team do you support?",
             "What do you usually do on Sundays? Is it different here?",
             "Have you found any good Mexican markets or restaurants here?"
+          ],
+          questionsEs: [
+            "¡Bienvenido/a! ¿De qué estado de México eres?",
+            "¿Tu ciudad natal es más una ciudad o un pueblo? ¿Por qué es conocida?",
+            "¿Cuál es tu platillo regional favorito de tu estado?",
+            "¿Creciste hablando alguna lengua indígena?",
+            "¿Qué tipo de trabajo hacías en México?",
+            "¿Cuál es tu época favorita del año en tu hogar? ¿Hay celebraciones especiales?",
+            "¿Has encontrado lugares aquí que te recuerden a México?",
+            "¿Sigues el fútbol? ¿A qué equipo apoyas?",
+            "¿Qué sueles hacer los domingos? ¿Es diferente aquí?",
+            "¿Has encontrado buenos mercados o restaurantes mexicanos aquí?"
           ]
         },
         professional: {
           title: "Latin American Professional",
+          titleEs: "Profesional Latinoamericano",
           questions: [
             "What type of work did you do back home?",
             "How different is your industry here compared to back home?",
@@ -82,13 +117,27 @@ const ConversationGuide = () => {
             "What professional goals do you have for the next few years?",
             "Do you need specific technical vocabulary for your work?",
             "How do business meetings here compare to back home?"
+          ],
+          questionsEs: [
+            "¿Qué tipo de trabajo hacías en tu país?",
+            "¿Qué tan diferente es tu industria aquí comparada con tu país?",
+            "¿Estudiaste en la universidad? ¿Cuál fue tu campo de estudio?",
+            "¿Qué habilidades de inglés te ayudarían más en tu trabajo?",
+            "¿Trabajas con otros hispanohablantes aquí?",
+            "¿Cuál es la mayor diferencia en la cultura laboral?",
+            "¿Planeas continuar en el mismo campo aquí?",
+            "¿Qué metas profesionales tienes para los próximos años?",
+            "¿Necesitas vocabulario técnico específico para tu trabajo?",
+            "¿Cómo se comparan las reuniones de trabajo aquí con las de tu país?"
           ]
         }
       }
     },
     casual: {
       title: "Friendly Casual Conversation",
+      titleEs: "Conversación Casual Amistosa",
       description: "A relaxed, informal approach focusing on building rapport",
+      descriptionEs: "Un enfoque relajado e informal centrado en construir relaciones",
       questions: [
         "Hi! I'm [teacher's name]. What should I call you?",
         "How are you finding the weather here compared to your hometown?",
@@ -100,11 +149,25 @@ const ConversationGuide = () => {
         "What kind of food do you like?",
         "Do you have any hobbies or interests you'd like to share?",
         "What do you hope to learn in this class?"
+      ],
+      questionsEs: [
+        "¡Hola! Soy [nombre del profesor]. ¿Cómo te gustaría que te llame?",
+        "¿Qué te parece el clima aquí comparado con tu ciudad natal?",
+        "¿Qué te trae a nuestra clase de inglés?",
+        "¿Qué tipo de trabajo haces? ¿Te gusta?",
+        "¿Qué te gusta hacer cuando no estás trabajando?",
+        "¿Has viajado mucho? ¿A dónde has ido?",
+        "¿Qué es lo que más te gusta de vivir aquí?",
+        "¿Qué tipo de comida te gusta?",
+        "¿Tienes algún pasatiempo o interés que te gustaría compartir?",
+        "¿Qué esperas aprender en esta clase?"
       ]
     },
     professional: {
       title: "Professional Focus",
+      titleEs: "Enfoque Profesional",
       description: "Emphasis on work-related English needs",
+      descriptionEs: "Énfasis en las necesidades de inglés relacionadas con el trabajo",
       questions: [
         "Welcome to our class. Could you introduce yourself?",
         "What industry do you work in?",
@@ -116,11 +179,25 @@ const ConversationGuide = () => {
         "What challenges do you face with English at work?",
         "Do you work with international teams?",
         "What skills would help you most in your career?"
+      ],
+      questionsEs: [
+        "Bienvenido/a a nuestra clase. ¿Podrías presentarte?",
+        "¿En qué industria trabajas?",
+        "¿Podrías contarme sobre tu rol y responsabilidades?",
+        "¿Con qué frecuencia usas inglés en tu trabajo?",
+        "¿Qué tipos de comunicación en inglés necesitas más?",
+        "¿Tienes metas específicas de inglés relacionadas con el trabajo?",
+        "¿Has tomado clases de inglés antes?",
+        "¿Qué desafíos enfrentas con el inglés en el trabajo?",
+        "¿Trabajas con equipos internacionales?",
+        "¿Qué habilidades te ayudarían más en tu carrera?"
       ]
     },
     cultural: {
       title: "Cultural Exchange",
+      titleEs: "Intercambio Cultural",
       description: "Focus on cultural background and adaptation",
+      descriptionEs: "Enfoque en el contexto cultural y la adaptación",
       questions: [
         "Welcome! I'd love to learn about where you're from.",
         "How long have you been living here?",
@@ -132,6 +209,18 @@ const ConversationGuide = () => {
         "Have you traveled to many countries?",
         "What's something unique about your culture?",
         "What aspects of local culture interest you?"
+      ],
+      questionsEs: [
+        "¡Bienvenido/a! Me encantaría saber de dónde eres.",
+        "¿Cuánto tiempo llevas viviendo aquí?",
+        "¿Cuál es la mayor diferencia entre aquí y tu ciudad natal?",
+        "¿Qué idiomas hablas?",
+        "¿Cuál es tu comida tradicional favorita de tu país?",
+        "¿Mantienes contacto con tu familia en tu país?",
+        "¿Qué actividades culturales disfrutas?",
+        "¿Has viajado a muchos países?",
+        "¿Qué es algo único de tu cultura?",
+        "¿Qué aspectos de la cultura local te interesan?"
       ]
     }
   };
@@ -140,12 +229,24 @@ const ConversationGuide = () => {
   const questions = selectedGuide === 'latinAmerica' 
     ? guides.latinAmerica.subGuides[selectedSubGuide].questions
     : currentGuide.questions;
+  const questionsEs = selectedGuide === 'latinAmerica'
+    ? guides.latinAmerica.subGuides[selectedSubGuide].questionsEs
+    : currentGuide.questionsEs;
+
+  const displayQuestions = language === 'en' ? questions : questionsEs;
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
       <Card>
-        <CardHeader>
-          <CardTitle>Conversation Guide Selection</CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>{language === 'en' ? 'Conversation Guide Selection' : 'Selección de Guía de Conversación'}</CardTitle>
+          <Button
+            onClick={() => setLanguage(lang => lang === 'en' ? 'es' : 'en')}
+            variant="outline"
+            className="ml-4"
+          >
+            {language === 'en' ? 'Ver en Español' : 'View in English'}
+          </Button>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
@@ -158,7 +259,7 @@ const ConversationGuide = () => {
                 <div key={key} className="flex items-center space-x-2">
                   <RadioGroupItem value={key} id={key} />
                   <Label htmlFor={key} className="font-medium">
-                    {guide.title}
+                    {language === 'en' ? guide.title : guide.titleEs}
                   </Label>
                 </div>
               ))}
@@ -166,7 +267,9 @@ const ConversationGuide = () => {
 
             {selectedGuide === 'latinAmerica' && (
               <div className="mt-4 border-t pt-4">
-                <label className="text-sm font-medium mb-2 block">Choose Specific Guide:</label>
+                <label className="text-sm font-medium mb-2 block">
+                  {language === 'en' ? 'Choose Specific Guide:' : 'Elige una Guía Específica:'}
+                </label>
                 <RadioGroup
                   value={selectedSubGuide}
                   onValueChange={setSelectedSubGuide}
@@ -176,7 +279,7 @@ const ConversationGuide = () => {
                     <div key={key} className="flex items-center space-x-2">
                       <RadioGroupItem value={key} id={`sub-${key}`} />
                       <Label htmlFor={`sub-${key}`} className="font-medium">
-                        {guide.title}
+                        {language === 'en' ? guide.title : guide.titleEs}
                       </Label>
                     </div>
                   ))}
@@ -190,18 +293,22 @@ const ConversationGuide = () => {
       <Card className="bg-white">
         <CardHeader>
           <CardTitle>
-            {selectedGuide === 'latinAmerica'
-              ? guides.latinAmerica.subGuides[selectedSubGuide].title 
-              : currentGuide.title}
+            {language === 'en' 
+              ? (selectedGuide === 'latinAmerica'
+                ? guides.latinAmerica.subGuides[selectedSubGuide].title 
+                : currentGuide.title)
+              : (selectedGuide === 'latinAmerica'
+                ? guides.latinAmerica.subGuides[selectedSubGuide].titleEs
+                : currentGuide.titleEs)}
           </CardTitle>
           <p className="text-sm text-gray-600">
-            {currentGuide.description}
+            {language === 'en' ? currentGuide.description : currentGuide.descriptionEs}
           </p>
         </CardHeader>
         <CardContent>
           <ScrollArea className="h-[400px] pr-4">
             <ol className="space-y-4">
-              {questions.map((question, index) => (
+              {displayQuestions?.map((question, index) => (
                 <li key={index} className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-lg">{question}</p>
                   <p className="text-sm text-gray-500 mt-1">
@@ -219,16 +326,16 @@ const ConversationGuide = () => {
 
 // Helper function to provide tips for the teacher
 const getPromptTip = (question: string): string => {
-  if (question.includes("work")) {
+  if (question.includes("work") || question.includes("trabajo")) {
     return "Listen for job title, industry, and work environment";
   }
-  if (question.includes("hobby") || question.includes("interests")) {
+  if (question.includes("hobby") || question.includes("interests") || question.includes("pasatiempo") || question.includes("interés")) {
     return "Note specific activities and enthusiasm levels";
   }
-  if (question.includes("traveled")) {
+  if (question.includes("traveled") || question.includes("viajado")) {
     return "Record countries visited and travel experiences";
   }
-  if (question.includes("food")) {
+  if (question.includes("food") || question.includes("comida")) {
     return "Note cultural preferences and dietary considerations";
   }
   return "Listen for details that could help personalize future lessons";
