@@ -52,7 +52,7 @@ function App() {
           {/* Two Column Layout with Emphasized Guide */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
             {/* Conversation Guide Section - Wider Column */}
-            <section className="md:col-span-3 space-y-4 order-first">
+            <section className="md:col-span-3 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold text-[#1a365d]">Teacher's Conversation Guide</h2>
               </div>
@@ -61,13 +61,15 @@ function App() {
               </div>
             </section>
 
-            {/* Student Interview Section - Narrower Column */}
+            {/* Student Interview Section - Narrower Column with Sticky Positioning */}
             <section className="md:col-span-2 space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-semibold text-[#1a365d]">New Student Interview</h2>
-              </div>
-              <div className="w-full bg-white p-6 rounded-lg border border-[#e2e8f0] shadow-sm hover:shadow-md transition-shadow duration-300">
-                <StudentForm />
+              <div className="sticky top-20 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-2xl font-semibold text-[#1a365d]">New Student Interview</h2>
+                </div>
+                <div className="w-full bg-white p-6 rounded-lg border border-[#e2e8f0] shadow-sm hover:shadow-md transition-shadow duration-300">
+                  <StudentForm />
+                </div>
               </div>
             </section>
           </div>
