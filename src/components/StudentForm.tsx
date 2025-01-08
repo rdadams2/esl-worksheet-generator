@@ -3,11 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Mic } from "lucide-react";
+import { Mic, Search, Edit2 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-// Replace with your actual server endpoint
+// Replace with your actual server endpoints
 const HLS_SERVER_URL = 'https://command.otter-hamal.ts.net';
+const API_BASE_URL = 'http://localhost:8000';
 
 interface TranscriptionResponse {
   type: 'transcription' | 'error' | 'config_ack' | 'status';
@@ -18,13 +21,48 @@ interface TranscriptionResponse {
   accumulated_seconds?: number;
 }
 
+interface Student {
+  id: string;
+  name: string;
+  native_language: string;
+  english_level: string;
+  job_title?: string;
+  hometown?: string;
+  current_city?: string;
+  interests?: string[];
+  hobbies?: string[];
+  learning_goals?: string[];
+}
+
+interface ExtractedInfo {
+  name?: string;
+  native_language?: string;
+  english_level?: string;
+  job_title?: string;
+  hometown?: string;
+  current_city?: string;
+  interests?: string[];
+  hobbies?: string[];
+  learning_goals?: string[];
+  [key: string]: any;
+}
+
 const StudentForm = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [feedback, setFeedback] = useState('');
   const [transcription, setTranscription] = useState<string>('');
+  const [editableTranscription, setEditableTranscription] = useState<string>('');
   const [processingStatus, setProcessingStatus] = useState('');
   const [hasRecorded, setHasRecorded] = useState(false);
   const [totalSeconds, setTotalSeconds] = useState(0);
+  const [studentName, setStudentName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [currentStudentId, setCurrentStudentId] = useState<string | null>(null);
+  const [searchResults, setSearchResults] = useState<Student[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [extractedInfo, setExtractedInfo] = useState<ExtractedInfo | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
   
   const websocketRef = useRef<WebSocket | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -34,8 +72,8 @@ const StudentForm = () => {
   const noSpeechTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setFeedback(''); // Clear any initial feedback
-    setProcessingStatus(''); // Clear any initial processing status
+    setFeedback('');
+    setProcessingStatus('');
     return () => {
       stopRecording();
       if (websocketRef.current) {
@@ -46,6 +84,151 @@ const StudentForm = () => {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (transcription) {
+      setEditableTranscription(transcription);
+    }
+  }, [transcription]);
+
+  const searchStudents = async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([]);
+      return;
+    }
+
+    setIsSearching(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/?skip=0&limit=5&search=${encodeURIComponent(query)}`);
+      if (!response.ok) throw new Error('Failed to search students');
+      const students = await response.json();
+      setSearchResults(students);
+    } catch (error) {
+      console.error('Error searching students:', error);
+      setFeedback('Error searching for students');
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectExistingStudent = (student: Student) => {
+    setStudentName(student.name);
+    setCurrentStudentId(student.id);
+    setSearchResults([]);
+  };
+
+  const previewAnalysis = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/analyze-text/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text: editableTranscription,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to analyze text');
+      const analysis = await response.json();
+      setExtractedInfo(analysis);
+      setShowPreview(true);
+    } catch (error) {
+      console.error('Error analyzing text:', error);
+      setFeedback('Error analyzing transcription');
+    }
+  };
+
+  const createStudent = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: studentName,
+          ...extractedInfo,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to create student');
+      const student: Student = await response.json();
+      setCurrentStudentId(student.id);
+      return student.id;
+    } catch (error) {
+      console.error('Error creating student:', error);
+      setFeedback('Error creating student profile');
+      throw error;
+    }
+  };
+
+  const updateStudent = async (studentId: string) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/students/${studentId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...extractedInfo,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to update student');
+      await response.json();
+    } catch (error) {
+      console.error('Error updating student:', error);
+      setFeedback('Error updating student profile');
+      throw error;
+    }
+  };
+
+  const submitTranscription = async () => {
+    if (!editableTranscription.trim() || !studentName.trim()) {
+      setFeedback('Please enter student name and complete the recording');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Create or update student
+      const studentId = currentStudentId || await createStudent();
+      if (currentStudentId && extractedInfo) {
+        await updateStudent(currentStudentId);
+      }
+
+      // Submit conversation
+      const response = await fetch(`${API_BASE_URL}/conversations/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          student_id: studentId,
+          transcription: editableTranscription,
+          raw_audio_url: '',
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to submit conversation');
+
+      setFeedback('Interview submitted successfully!');
+      // Reset form
+      setTranscription('');
+      setEditableTranscription('');
+      setStudentName('');
+      setHasRecorded(false);
+      setCurrentStudentId(null);
+      setExtractedInfo(null);
+      setShowPreview(false);
+    } catch (error) {
+      console.error('Error submitting interview:', error);
+      setFeedback('Error submitting interview. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const initializeWebSocket = () => {
     const ws = new WebSocket(HLS_SERVER_URL.replace('https', 'wss'));
@@ -251,11 +434,42 @@ const StudentForm = () => {
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="studentName">Student Name</Label>
-            <Input 
-              id="studentName" 
-              placeholder="Enter student's name"
-              className="text-lg"
-            />
+            <div className="flex gap-2">
+              <Input 
+                id="studentName" 
+                placeholder="Enter or search student's name"
+                className="text-lg"
+                value={studentName}
+                onChange={(e) => {
+                  setStudentName(e.target.value);
+                  searchStudents(e.target.value);
+                }}
+                disabled={isRecording || isSubmitting}
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => searchStudents(studentName)}
+                disabled={isRecording || isSubmitting}
+              >
+                <Search className="h-4 w-4" />
+              </Button>
+            </div>
+            
+            {/* Search Results */}
+            {searchResults.length > 0 && (
+              <div className="mt-2 border rounded-md p-2 bg-background">
+                {searchResults.map((student) => (
+                  <button
+                    key={student.id}
+                    className="w-full text-left px-3 py-2 hover:bg-accent rounded-sm"
+                    onClick={() => selectExistingStudent(student)}
+                  >
+                    {student.name} - {student.english_level}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex justify-center space-x-4">
@@ -263,10 +477,32 @@ const StudentForm = () => {
               size="lg"
               className={`w-48 ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'}`}
               onClick={isRecording ? stopRecording : startRecording}
+              disabled={!studentName.trim() || isSubmitting}
             >
               <Mic className="mr-2 h-5 w-5" />
               {isRecording ? 'Stop Recording' : 'Start Recording'}
             </Button>
+
+            {hasRecorded && !isRecording && (
+              <>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={() => setIsEditing(!isEditing)}
+                  disabled={isSubmitting}
+                >
+                  <Edit2 className="mr-2 h-4 w-4" />
+                  Edit Transcript
+                </Button>
+                <Button
+                  size="lg"
+                  onClick={previewAnalysis}
+                  disabled={isSubmitting}
+                >
+                  Preview Analysis
+                </Button>
+              </>
+            )}
           </div>
 
           {feedback && (
@@ -281,10 +517,51 @@ const StudentForm = () => {
             </Alert>
           )}
 
-          {transcription && (
-            <div className="p-4 bg-muted rounded-lg">
-              <h3 className="font-semibold mb-2">Transcription:</h3>
-              <p>{transcription}</p>
+          {hasRecorded && (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <h3 className="font-semibold">Transcription:</h3>
+                </div>
+                {isEditing ? (
+                  <Textarea
+                    value={editableTranscription}
+                    onChange={(e) => setEditableTranscription(e.target.value)}
+                    className="min-h-[200px]"
+                  />
+                ) : (
+                  <p>{editableTranscription}</p>
+                )}
+              </div>
+
+              {showPreview && extractedInfo && (
+                <div className="p-4 bg-muted rounded-lg">
+                  <h3 className="font-semibold mb-4">Extracted Information:</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    {Object.entries(extractedInfo).map(([key, value]) => (
+                      value && (
+                        <div key={key} className="space-y-1">
+                          <Label>{key.replace(/_/g, ' ').toUpperCase()}</Label>
+                          <p className="text-sm">
+                            {Array.isArray(value) ? value.join(', ') : value}
+                          </p>
+                        </div>
+                      )
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {showPreview && (
+                <Button
+                  size="lg"
+                  className="w-full"
+                  onClick={submitTranscription}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Interview'}
+                </Button>
+              )}
             </div>
           )}
 
