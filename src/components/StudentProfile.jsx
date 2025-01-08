@@ -8,9 +8,22 @@ import {
 } from "@/components/ui/accordion"
 import PropTypes from 'prop-types'
 
+/**
+ * StudentProfile Component
+ * 
+ * A comprehensive profile display component for ESL students that shows detailed
+ * information about a student's background, interests, and learning context.
+ * The information is organized into collapsible sections using an accordion layout.
+ * 
+ * @component
+ * @param {Object} props
+ * @param {Object} props.student - The student data object containing all profile information
+ * @param {string} [props.profileImage] - Optional URL for the student's profile image
+ */
 export function StudentProfile({ student, profileImage }) {
   return (
     <div className="max-w-2xl mx-auto p-6 space-y-6">
+      {/* Header Section with Avatar and Basic Info */}
       <div className="flex items-center space-x-4">
         <Avatar className="w-24 h-24">
           <AvatarImage src={profileImage} alt={student.name} />
@@ -24,7 +37,9 @@ export function StudentProfile({ student, profileImage }) {
         </div>
       </div>
 
+      {/* Collapsible Sections using Accordion */}
       <Accordion type="single" collapsible className="w-full">
+        {/* Basic Information Section */}
         <AccordionItem value="basic-info">
           <AccordionTrigger>Basic Information</AccordionTrigger>
           <AccordionContent>
@@ -49,6 +64,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Professional Background Section */}
         <AccordionItem value="professional">
           <AccordionTrigger>Professional Background</AccordionTrigger>
           <AccordionContent>
@@ -73,6 +89,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Personal Background Section */}
         <AccordionItem value="personal">
           <AccordionTrigger>Personal Background</AccordionTrigger>
           <AccordionContent>
@@ -97,6 +114,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Interests & Hobbies Section */}
         <AccordionItem value="interests">
           <AccordionTrigger>Interests & Hobbies</AccordionTrigger>
           <AccordionContent>
@@ -117,6 +135,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Learning Context Section */}
         <AccordionItem value="learning">
           <AccordionTrigger>Learning Context</AccordionTrigger>
           <AccordionContent>
@@ -137,6 +156,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Cultural Elements Section */}
         <AccordionItem value="cultural">
           <AccordionTrigger>Cultural Elements</AccordionTrigger>
           <AccordionContent>
@@ -157,6 +177,7 @@ export function StudentProfile({ student, profileImage }) {
           </AccordionContent>
         </AccordionItem>
 
+        {/* Social Aspects Section */}
         <AccordionItem value="social">
           <AccordionTrigger>Social Aspects</AccordionTrigger>
           <AccordionContent>
@@ -178,6 +199,7 @@ export function StudentProfile({ student, profileImage }) {
         </AccordionItem>
       </Accordion>
 
+      {/* Action Buttons */}
       <div className="flex justify-end space-x-4">
         <Button variant="outline">Edit Profile</Button>
         <Button>Contact Student</Button>
@@ -186,32 +208,44 @@ export function StudentProfile({ student, profileImage }) {
   )
 }
 
+// PropTypes definition for type checking and documentation
 StudentProfile.propTypes = {
   student: PropTypes.shape({
+    // Basic Information
     name: PropTypes.string.isRequired,
     gender: PropTypes.string.isRequired,
     age_range: PropTypes.string.isRequired,
     native_language: PropTypes.string.isRequired,
     other_languages: PropTypes.arrayOf(PropTypes.string).isRequired,
     english_level: PropTypes.oneOf(['beginner', 'intermediate', 'advanced']).isRequired,
+    
+    // Professional Information
     job_title: PropTypes.string.isRequired,
     job_description: PropTypes.string.isRequired,
     industry: PropTypes.string.isRequired,
     years_of_experience: PropTypes.number.isRequired,
     work_environment: PropTypes.oneOf(['remote', 'office', 'hybrid', 'other']).isRequired,
+    
+    // Personal Information
     hometown: PropTypes.string.isRequired,
     current_city: PropTypes.string.isRequired,
     years_in_current_country: PropTypes.number.isRequired,
     family_status: PropTypes.string.isRequired,
     living_situation: PropTypes.string.isRequired,
+    
+    // Interests and Activities
     interests: PropTypes.arrayOf(PropTypes.string).isRequired,
     hobbies: PropTypes.arrayOf(PropTypes.string).isRequired,
     favorite_activities: PropTypes.arrayOf(PropTypes.string).isRequired,
     sports: PropTypes.arrayOf(PropTypes.string).isRequired,
+    
+    // Learning Context
     reason_for_learning: PropTypes.string.isRequired,
     english_usage_context: PropTypes.arrayOf(PropTypes.string).isRequired,
     learning_goals: PropTypes.arrayOf(PropTypes.string).isRequired,
     preferred_learning_style: PropTypes.arrayOf(PropTypes.string).isRequired,
+    
+    // Cultural and Social Aspects
     favorite_foods: PropTypes.arrayOf(PropTypes.string).isRequired,
     travel_experience: PropTypes.arrayOf(PropTypes.string).isRequired,
     cultural_interests: PropTypes.arrayOf(PropTypes.string).isRequired,

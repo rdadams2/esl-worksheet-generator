@@ -3,32 +3,47 @@ import ConversationGuide from './components/ConversationGuide';
 import StudentForm from './components/StudentForm';
 import { StudentProfile } from './components/StudentProfile';
 
-// Demo student data
+/**
+ * Demo student data for development and testing purposes.
+ * This object follows the Student type structure and provides
+ * a realistic example of a Latin American ESL student profile.
+ */
 const demoStudent = {
+  // Personal and Demographic Information
   name: "Maria González",
   gender: "Female",
   age_range: "25-30",
   native_language: "Spanish",
   other_languages: ["Portuguese"],
   english_level: "intermediate",
+
+  // Professional Background
   job_title: "Software Developer",
   job_description: "Full-stack developer at a tech startup",
   industry: "Technology",
   years_of_experience: 3,
   work_environment: "hybrid",
+
+  // Location and Living Situation
   hometown: "Mexico City, Mexico",
   current_city: "San Francisco, USA",
   years_in_current_country: 2,
   family_status: "Single",
   living_situation: "Shared apartment",
+
+  // Personal Interests and Activities
   interests: ["Technology", "Photography", "Travel"],
   hobbies: ["Hiking", "Cooking", "Reading"],
   favorite_activities: ["Beach trips", "City exploration", "Coffee shop hopping"],
   sports: ["Yoga", "Swimming"],
+
+  // English Learning Context
   reason_for_learning: "Career advancement and daily life in the US",
   english_usage_context: ["Work meetings", "Daily life", "Social situations"],
   learning_goals: ["Improve professional communication", "Reduce accent", "Build confidence"],
   preferred_learning_style: ["Visual", "Interactive"],
+
+  // Cultural and Social Preferences
   favorite_foods: ["Tacos", "Sushi", "Pizza"],
   travel_experience: ["Mexico", "USA", "Brazil", "Spain"],
   cultural_interests: ["International movies", "World music", "Different cuisines"],
@@ -38,20 +53,37 @@ const demoStudent = {
   social_interests: ["Meeting new people", "Cultural exchange", "Language meetups"]
 };
 
+/**
+ * App Component
+ * 
+ * The main application component that serves as the root layout for the ESL Worksheet Generator.
+ * It implements a responsive design with a sticky header and footer, and organizes content
+ * into a two-column layout for larger screens.
+ * 
+ * Layout Structure:
+ * - Header: Sticky navigation with app title
+ * - Main Content:
+ *   - Left Column (60%): Conversation Guide for teachers
+ *   - Right Column (40%): Student Interview form with sticky positioning
+ *   - Full Width: Student Profile preview section
+ * - Footer: App information
+ */
 function App() {
   return (
     <div className="min-h-screen bg-[#f0f4f8]">
+      {/* Sticky Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="container flex h-16 max-w-screen-2xl items-center">
           <h1 className="text-2xl font-semibold text-[#1a365d]">ESL Worksheet Generator</h1>
         </div>
       </header>
 
+      {/* Main Content Area */}
       <main className="container mx-auto py-12 px-6">
         <div className="grid gap-12">
           {/* Two Column Layout with Emphasized Guide */}
           <div className="grid grid-cols-1 md:grid-cols-5 gap-8">
-            {/* Conversation Guide Section - Wider Column */}
+            {/* Conversation Guide Section - Wider Column (60%) */}
             <section className="md:col-span-3 space-y-4">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-semibold text-[#1a365d]">Teacher's Conversation Guide</h2>
@@ -61,7 +93,7 @@ function App() {
               </div>
             </section>
 
-            {/* Student Interview Section - Narrower Column with Sticky Positioning */}
+            {/* Student Interview Section - Narrower Column (40%) with Sticky Positioning */}
             <section className="md:col-span-2 space-y-4">
               <div className="sticky top-20 space-y-4">
                 <div className="flex items-center justify-between">
@@ -74,7 +106,7 @@ function App() {
             </section>
           </div>
 
-          {/* Student Profile Section - Full Width */}
+          {/* Student Profile Preview Section - Full Width */}
           <section className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-2xl font-semibold text-[#1a365d]">Student Profile Preview</h2>
@@ -89,6 +121,7 @@ function App() {
         </div>
       </main>
 
+      {/* Footer */}
       <footer className="border-t bg-white">
         <div className="container mx-auto py-6 text-center text-sm text-[#4a5568]">
           <p>ESL Worksheet Generator - A Professional Tool for Language Educators</p>

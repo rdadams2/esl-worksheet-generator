@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 
+// Types for the conversation guide structure
 type SubGuide = {
   title: string;
   titleEs: string;
@@ -24,6 +25,7 @@ type Guide = {
   };
 };
 
+// Main guide structure containing all conversation templates
 type Guides = {
   latinAmerica: Guide & {
     subGuides: {
@@ -35,11 +37,26 @@ type Guides = {
   cultural: Guide & { questions: string[]; questionsEs: string[] };
 };
 
+/**
+ * ConversationGuide Component
+ * 
+ * A bilingual (English/Spanish) conversation guide component that provides structured
+ * interview questions for ESL teachers. It includes different categories of questions
+ * and supports specialized guides for Latin American students.
+ * 
+ * Features:
+ * - Multiple conversation categories (casual, professional, cultural, Latin American)
+ * - Bilingual support (English/Spanish)
+ * - Dynamic sub-guide selection for Latin American conversations
+ * - Scrollable question list with teaching tips
+ */
 const ConversationGuide = () => {
+  // State management for guide selection and language preference
   const [selectedGuide, setSelectedGuide] = useState<keyof Guides>('casual');
   const [selectedSubGuide, setSelectedSubGuide] = useState<string>('general');
   const [language, setLanguage] = useState<'en' | 'es'>('en');
 
+  // Comprehensive guide data structure containing all conversation templates
   const guides: Guides = {
     latinAmerica: {
       title: "Latin American Cultural Connection",
@@ -225,6 +242,7 @@ const ConversationGuide = () => {
     }
   };
 
+  // Determine which questions to display based on selected guide and language
   const currentGuide = guides[selectedGuide];
   const questions = selectedGuide === 'latinAmerica' 
     ? guides.latinAmerica.subGuides[selectedSubGuide].questions
@@ -233,13 +251,16 @@ const ConversationGuide = () => {
     ? guides.latinAmerica.subGuides[selectedSubGuide].questionsEs
     : currentGuide.questionsEs;
 
+  // Select questions based on chosen language
   const displayQuestions = language === 'en' ? questions : questionsEs;
 
   return (
     <div className="w-full max-w-4xl mx-auto p-4 space-y-6">
+      {/* Guide Selection Card */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>{language === 'en' ? 'Conversation Guide Selection' : 'Selección de Guía de Conversación'}</CardTitle>
+          {/* Language Toggle Button */}
           <Button
             onClick={() => setLanguage(lang => lang === 'en' ? 'es' : 'en')}
             variant="outline"
@@ -250,6 +271,7 @@ const ConversationGuide = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
+            {/* Main Guide Category Selection */}
             <RadioGroup
               value={selectedGuide}
               onValueChange={(value) => setSelectedGuide(value as keyof Guides)}
@@ -265,6 +287,7 @@ const ConversationGuide = () => {
               ))}
             </RadioGroup>
 
+            {/* Latin America Specific Sub-guide Selection */}
             {selectedGuide === 'latinAmerica' && (
               <div className="mt-4 border-t pt-4">
                 <label className="text-sm font-medium mb-2 block">
@@ -290,6 +313,7 @@ const ConversationGuide = () => {
         </CardContent>
       </Card>
 
+      {/* Questions Display Card */}
       <Card className="bg-white">
         <CardHeader>
           <CardTitle>
@@ -306,6 +330,7 @@ const ConversationGuide = () => {
           </p>
         </CardHeader>
         <CardContent>
+          {/* Scrollable Questions List */}
           <ScrollArea className="h-[400px] pr-4">
             <ol className="space-y-4">
               {displayQuestions?.map((question, index) => (
@@ -324,7 +349,13 @@ const ConversationGuide = () => {
   );
 };
 
-// Helper function to provide tips for the teacher
+/**
+ * Helper function that provides contextual tips for teachers based on the question type.
+ * These tips help teachers focus on relevant information during the conversation.
+ * 
+ * @param question - The conversation question to analyze
+ * @returns A relevant teaching tip based on the question content
+ */
 const getPromptTip = (question: string): string => {
   if (question.includes("work") || question.includes("trabajo")) {
     return "Listen for job title, industry, and work environment";

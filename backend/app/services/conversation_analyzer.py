@@ -1,9 +1,30 @@
+"""Natural language processing service for analyzing student conversations.
+
+This module provides functionality to analyze conversation transcripts and extract
+relevant information about students using spaCy for NLP tasks. It can identify
+personal information, preferences, and various attributes from natural language text.
+"""
+
 import spacy
 from typing import Dict, List, Any
 import re
 
 class ConversationAnalyzer:
+    """Service class for analyzing conversation transcripts using NLP.
+    
+    This class uses spaCy for natural language processing to extract structured
+    information from conversation transcripts. It can identify various attributes
+    like personal information, interests, and preferences through pattern matching
+    and entity recognition.
+    
+    Attributes:
+        nlp (spacy.Language): Loaded spaCy language model
+        patterns (Dict[str, str]): Regular expression patterns for extracting specific information
+        categories (Dict[str, List[str]]): Keywords associated with different information categories
+    """
+    
     def __init__(self):
+        """Initialize the ConversationAnalyzer with spaCy model and patterns."""
         # Load English language model
         self.nlp = spacy.load("en_core_web_lg")
         
@@ -24,8 +45,14 @@ class ConversationAnalyzer:
         }
 
     def analyze_transcription(self, transcription: str) -> Dict[str, Any]:
-        """
-        Analyze the conversation transcription and extract relevant information
+        """Analyze conversation transcription and extract relevant information.
+        
+        Args:
+            transcription (str): The text transcription of the conversation
+            
+        Returns:
+            Dict[str, Any]: Dictionary containing extracted information with keys
+                corresponding to student attributes and their extracted values
         """
         doc = self.nlp(transcription)
         
@@ -50,7 +77,14 @@ class ConversationAnalyzer:
         return {k: v for k, v in result.items() if v is not None}
 
     def _extract_name(self, doc: spacy.tokens.Doc) -> str:
-        """Extract person name from the conversation"""
+        """Extract person name from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            
+        Returns:
+            str: Extracted full name or None if not found
+        """
         for ent in doc.ents:
             if ent.label_ == "PERSON":
                 # Verify it's likely a full name (first and last)
@@ -59,14 +93,29 @@ class ConversationAnalyzer:
         return None
 
     def _extract_pattern(self, text: str, pattern_key: str) -> str:
-        """Extract information based on regex patterns"""
+        """Extract information based on regex patterns.
+        
+        Args:
+            text (str): Text to search in
+            pattern_key (str): Key for the pattern to use from self.patterns
+            
+        Returns:
+            str: Matched text or None if no match found
+        """
         match = re.search(self.patterns[pattern_key], text, re.IGNORECASE)
         if match:
             return match.group(0)
         return None
 
     def _extract_language(self, doc: spacy.tokens.Doc) -> str:
-        """Extract native language information"""
+        """Extract native language information from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            
+        Returns:
+            str: Extracted language name or None if not found
+        """
         language_indicators = ["native language", "mother tongue", "first language"]
         for sent in doc.sents:
             for indicator in language_indicators:
@@ -78,7 +127,14 @@ class ConversationAnalyzer:
         return None
 
     def _extract_english_level(self, doc: spacy.tokens.Doc) -> str:
-        """Extract English proficiency level"""
+        """Extract English proficiency level from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            
+        Returns:
+            str: Extracted proficiency level or None if not found
+        """
         levels = ["beginner", "intermediate", "advanced", "fluent"]
         level_indicators = ["level", "proficiency", "english"]
         
@@ -91,7 +147,14 @@ class ConversationAnalyzer:
         return None
 
     def _extract_job_title(self, doc: spacy.tokens.Doc) -> str:
-        """Extract job title information"""
+        """Extract job title information from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            
+        Returns:
+            str: Extracted job title or None if not found
+        """
         job_indicators = ["work as", "job is", "position is", "profession is"]
         for sent in doc.sents:
             for indicator in job_indicators:
@@ -105,7 +168,15 @@ class ConversationAnalyzer:
         return None
 
     def _extract_location(self, doc: spacy.tokens.Doc, location_type: str) -> str:
-        """Extract location information based on type (hometown or current city)"""
+        """Extract location information based on type from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            location_type (str): Type of location to extract ('hometown' or 'current_city')
+            
+        Returns:
+            str: Extracted location name or None if not found
+        """
         location_indicators = {
             "hometown": ["from", "grew up in", "born in"],
             "current_city": ["live in", "living in", "moved to", "currently in"]
@@ -119,7 +190,15 @@ class ConversationAnalyzer:
         return None
 
     def _extract_category(self, doc: spacy.tokens.Doc, category: str) -> List[str]:
-        """Extract information for a specific category"""
+        """Extract information for a specific category from the conversation.
+        
+        Args:
+            doc (spacy.tokens.Doc): spaCy document object
+            category (str): Category to extract (e.g., 'hobbies', 'sports')
+            
+        Returns:
+            List[str]: List of extracted items for the category or None if none found
+        """
         results = []
         for sent in doc.sents:
             if any(keyword in sent.text.lower() for keyword in self.categories[category]):
