@@ -1,86 +1,138 @@
+"""FastAPI application for the ESL Worksheet Generator.
+
+This module defines the FastAPI application and its endpoints for handling
+student information, transcriptions, and worksheet generation.
+"""
+
 from fastapi import FastAPI, HTTPException, Depends
-from sqlalchemy.orm import Session
+from sqlmodel import Session, select
 from typing import List, Dict, Any
-import spacy
 
-from app.db.database import get_db
-from app.db.models import Student as DBStudent, Conversation as DBConversation
-from app.api.models.student import Student, StudentCreate, Conversation, ConversationCreate
-from app.services.conversation_analyzer import ConversationAnalyzer
+from app.db.database import get_session
+from app.db.models import (
+    Student, BasicInformation, ProfessionalBackground, PersonalBackground,
+    InterestHobby, LearningContext, CulturalElements, SocialAspects,
+    Interview, InterviewTemplate
+)
+from app.core.dependencies import get_student_extraction_service
+from app.services.student_extractor import StudentExtractionService
+from app.api.models.transcription import TranscriptionCreate
+from app.api.models.student import StudentDetailResponse
+from app.api.routes import worksheets
 
-app = FastAPI(title="ESL Worksheet Generator API")
+app = FastAPI(
+    title="ESL Worksheet Generator API",
+    description="API for generating personalized ESL worksheets based on student interviews",
+    version="0.1.0"
+)
 
-# Initialize the conversation analyzer
-analyzer = ConversationAnalyzer()
+# Include routers
+app.include_router(worksheets.router, tags=["worksheets"])
 
-@app.post("/analyze-text/", response_model=Dict[str, Any])
-async def analyze_text(text: str):
-    """Analyze text and extract information without creating a conversation"""
+@app.post("/transcriptions/", response_model=Dict[str, Any])
+async def process_transcription(
+    transcription_data: TranscriptionCreate,
+    service: StudentExtractionService = Depends(get_student_extraction_service),
+    session: Session = Depends(get_session)
+) -> Dict[str, Any]:
+    """Process a transcription to extract student information.
+    
+    Args:
+        transcription_data: Transcription data
+        service: Student extraction service
+        session: Database session
+        
+    Returns:
+        Dict[str, Any]: Processed student information
+        
+    Raises:
+        HTTPException: If processing fails
+    """
     try:
-        analysis_result = analyzer.analyze_transcription(text)
-        return analysis_result
+        # Extract information from transcription
+        extracted_data = await service.process_transcription(transcription_data.transcription)
+        
+        # Save to database
+        student = await service.save_student_info(session, extracted_data)
+        
+        return {
+            "status": "success",
+            "student_id": student.student_id,
+            "extracted_info": extracted_data
+        }
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to process transcription: {str(e)}"
+        )
 
-@app.post("/students/", response_model=Student)
-def create_student(student: StudentCreate, db: Session = Depends(get_db)):
-    db_student = DBStudent(**student.dict())
-    db.add(db_student)
-    db.commit()
-    db.refresh(db_student)
-    return db_student
-
-@app.get("/students/", response_model=List[Student])
-def get_students(skip: int = 0, limit: int = 100, search: str = "", db: Session = Depends(get_db)):
-    query = db.query(DBStudent)
-    if search:
-        query = query.filter(DBStudent.name.ilike(f"%{search}%"))
-    students = query.offset(skip).limit(limit).all()
+@app.get("/students/", response_model=List[StudentDetailResponse])
+def get_students(
+    skip: int = 0,
+    limit: int = 100,
+    session: Session = Depends(get_session)
+) -> List[StudentDetailResponse]:
+    """Get a list of students with their basic information.
+    
+    Args:
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        session: Database session
+        
+    Returns:
+        List[StudentDetailResponse]: List of student records with basic information
+    """
+    statement = select(Student).offset(skip).limit(limit)
+    students = session.exec(statement).all()
     return students
 
-@app.get("/students/{student_id}", response_model=Student)
-def get_student(student_id: str, db: Session = Depends(get_db)):
-    student = db.query(DBStudent).filter(DBStudent.id == student_id).first()
+@app.get("/students/{student_id}", response_model=StudentDetailResponse)
+def get_student(
+    student_id: int,
+    session: Session = Depends(get_session)
+) -> StudentDetailResponse:
+    """Get detailed information about a student.
+    
+    Args:
+        student_id: Student ID
+        session: Database session
+        
+    Returns:
+        StudentDetailResponse: Student record with basic information
+        
+    Raises:
+        HTTPException: If student not found
+    """
+    # Query student with basic info
+    statement = (
+        select(Student)
+        .where(Student.student_id == student_id)
+    )
+    student = session.exec(statement).first()
+    
     if student is None:
         raise HTTPException(status_code=404, detail="Student not found")
+        
     return student
 
-@app.put("/students/{student_id}", response_model=Student)
-def update_student(student_id: str, student_update: Dict[str, Any], db: Session = Depends(get_db)):
-    student = db.query(DBStudent).filter(DBStudent.id == student_id).first()
+@app.get("/students/{student_id}/interviews", response_model=List[Interview])
+def get_student_interviews(
+    student_id: int,
+    session: Session = Depends(get_session)
+) -> List[Interview]:
+    """Get all interviews for a student.
+    
+    Args:
+        student_id: Student ID
+        session: Database session
+        
+    Returns:
+        List[Interview]: List of interview records
+        
+    Raises:
+        HTTPException: If student not found
+    """
+    student = session.get(Student, student_id)
     if student is None:
         raise HTTPException(status_code=404, detail="Student not found")
-    
-    for key, value in student_update.items():
-        if hasattr(student, key):
-            setattr(student, key, value)
-    
-    db.commit()
-    db.refresh(student)
-    return student
-
-@app.post("/conversations/", response_model=Conversation)
-async def create_conversation(conversation: ConversationCreate, db: Session = Depends(get_db)):
-    # First, analyze the conversation
-    analysis_result = analyzer.analyze_transcription(conversation.transcription)
-    
-    # Create the conversation record
-    db_conversation = DBConversation(**conversation.dict())
-    db.add(db_conversation)
-    
-    # Update or create student profile with extracted information
-    student = db.query(DBStudent).filter(DBStudent.id == conversation.student_id).first()
-    if student:
-        # Update existing student with new information
-        for key, value in analysis_result.items():
-            if value is not None:  # Only update if we found a value
-                setattr(student, key, value)
-    
-    db.commit()
-    db.refresh(db_conversation)
-    return db_conversation
-
-@app.get("/conversations/{student_id}", response_model=List[Conversation])
-def get_student_conversations(student_id: str, db: Session = Depends(get_db)):
-    conversations = db.query(DBConversation).filter(DBConversation.student_id == student_id).all()
-    return conversations 
+    return student.interviews 

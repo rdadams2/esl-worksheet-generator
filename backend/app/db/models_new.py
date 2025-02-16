@@ -7,8 +7,6 @@ student profiles, assignments, and related data.
 from typing import Optional, Dict, Any, List
 from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
-from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy import Column
 from uuid import UUID, uuid4
 
 # Base Tables
@@ -35,14 +33,7 @@ class Student(StudentBase, table=True):
     classes: List["StudentClass"] = Relationship(back_populates="student")
     personalized_homeworks: List["PersonalizedHomework"] = Relationship(back_populates="student")
     personalized_activities: List["PersonalizedActivity"] = Relationship(back_populates="student")
-    activity_groups_as_student_1: List["ActivityGroup"] = Relationship(
-        back_populates="student_1",
-        sa_relationship_kwargs={"foreign_keys": "[ActivityGroup.student_id_1]"}
-    )
-    activity_groups_as_student_2: List["ActivityGroup"] = Relationship(
-        back_populates="student_2",
-        sa_relationship_kwargs={"foreign_keys": "[ActivityGroup.student_id_2]"}
-    )
+    activity_groups: List["ActivityGroup"] = Relationship(back_populates="student")
 
 # Student-Related Tables
 class BasicInformation(SQLModel, table=True):
@@ -160,7 +151,7 @@ class InterviewTemplate(SQLModel, table=True):
     template_id: Optional[int] = Field(default=None, primary_key=True)
     class_id: int = Field(foreign_key="class.class_id")
     template_name: str
-    questions: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    questions: Dict[str, Any]
     instructions: str
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
@@ -175,7 +166,7 @@ class Interview(SQLModel, table=True):
     template_id: int = Field(foreign_key="interviewtemplate.template_id")
     interview_date: date
     transcript: str
-    parsed_data: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    parsed_data: Dict[str, Any]
     interview_status: str
     parsing_status: str
     
@@ -188,7 +179,7 @@ class HomeworkTemplate(SQLModel, table=True):
     class_id: int = Field(foreign_key="class.class_id")
     name: str
     objective: str
-    base_questions: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    base_questions: Dict[str, Any]
     due_date: date
     
     class_: Class = Relationship(back_populates="homework_templates")
@@ -198,7 +189,7 @@ class PersonalizedHomework(SQLModel, table=True):
     homework_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: int = Field(foreign_key="homeworktemplate.template_id")
     student_id: int = Field(foreign_key="student.student_id")
-    personalized_questions: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    personalized_questions: Dict[str, Any]
     generated_at: datetime = Field(default_factory=datetime.utcnow)
     generation_status: str
     
@@ -210,7 +201,7 @@ class ActivityTemplate(SQLModel, table=True):
     class_id: int = Field(foreign_key="class.class_id")
     name: str
     objective: str
-    base_conversation_template: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    base_conversation_template: Dict[str, Any]
     
     class_: Class = Relationship(back_populates="activity_templates")
     personalized_activities: List["PersonalizedActivity"] = Relationship(back_populates="template")
@@ -220,7 +211,7 @@ class PersonalizedActivity(SQLModel, table=True):
     activity_id: Optional[int] = Field(default=None, primary_key=True)
     template_id: int = Field(foreign_key="activitytemplate.template_id")
     student_id: int = Field(foreign_key="student.student_id")
-    personalized_conversation: Dict[str, Any] = Field(sa_column=Column(JSONB))
+    personalized_conversation: Dict[str, Any]
     generated_at: datetime = Field(default_factory=datetime.utcnow)
     generation_status: str
     
@@ -235,11 +226,4 @@ class ActivityGroup(SQLModel, table=True):
     completion_date: date
     
     activity_template: ActivityTemplate = Relationship(back_populates="activity_groups")
-    student_1: Student = Relationship(
-        back_populates="activity_groups_as_student_1",
-        sa_relationship_kwargs={"foreign_keys": "[ActivityGroup.student_id_1]"}
-    )
-    student_2: Student = Relationship(
-        back_populates="activity_groups_as_student_2",
-        sa_relationship_kwargs={"foreign_keys": "[ActivityGroup.student_id_2]"}
-    ) 
+    student: Student = Relationship(back_populates="activity_groups") 

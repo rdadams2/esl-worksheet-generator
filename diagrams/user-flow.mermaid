@@ -1,0 +1,46 @@
+flowchart TD
+    %% Main Actors
+    Professor[Professor]
+    Student[Student]
+    Database[(Database)]
+    
+    %% Professor Flow
+    Professor -->|Uploads| BlankHW[Previous Semester's Assignments]
+    BlankHW -->|Stored in| Database
+    
+    %% Student Registration and Interview
+    Student -->|Logs into| App[Application]
+    App -->|Presents| Interview[Interview Questions]
+    Student -->|Speaks responses into| Mic[Microphone]
+    Mic -->|Voice transcription, Interest Extraction| TransScript[Transcribed Responses]
+    
+    %% Database Storage
+    TransScript -->|Stores in tables| Database
+    subgraph DB_Tables[Database Tables]
+        Student_Table[Student]
+        Interests[Student_Interest]
+        Occupation[Student_Occupation]
+        Hometown[Student_Hometown]
+    end
+    Database --- DB_Tables
+    
+    %% Content Generation
+    Database -->|Provides student and curriculum data| Generator[Curriculum Generator]
+    Generator -->|Creates| PersonalizedContent{Personalized Curriculum}
+    PersonalizedContent -->|Individual| PersonalHW[Homework Assignments]
+    PersonalizedContent -->|Paired| PairedActivities[In-Person Activities]
+    
+    %% Output Generation
+    PersonalHW --> PDFGen[PDF Generator]
+    PairedActivities --> PDFGen
+    PDFGen -->|Distributes Printable Assignments | Professor
+    
+    %% Styles
+    classDef actor fill:#00000,stroke:#333,stroke-width:2px
+    classDef system fill:#000,stroke:#333,stroke-width:2px
+    classDef storage fill:#000,stroke:#333,stroke-width:2px
+    
+    class Professor,Student actor
+    class App,Generator,PDFGen system
+    class Database,DB_Tables storage
+

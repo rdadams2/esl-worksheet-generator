@@ -1,41 +1,38 @@
 """Database configuration and session management for the ESL Worksheet Generator.
 
-This module sets up the SQLAlchemy database connection and session management.
+This module sets up the SQLModel database connection and session management.
 It provides the database engine, session factory, and base model class for the application.
 """
 
-from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlmodel import create_engine, Session, SQLModel
+from typing import Generator
 
 # Database connection URL
-SQLALCHEMY_DATABASE_URL = "postgresql://postgres:postgres@localhost/esl_worksheet"
+DATABASE_URL = "postgresql://postgres:postgres@localhost/esl_worksheet"
 
 # Create database engine instance
-engine = create_engine(SQLALCHEMY_DATABASE_URL)
+engine = create_engine(DATABASE_URL, echo=True)
 
-# Create sessionmaker instance for database sessions
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+def init_db() -> None:
+    """Initialize the database by creating all tables."""
+    SQLModel.metadata.create_all(engine)
 
-# Create declarative base class for database models
-Base = declarative_base()
-
-def get_db():
+def get_session() -> Generator[Session, None, None]:
     """Database dependency callable to handle database sessions.
     
     Creates a new database session and ensures it's properly closed after use.
     This function is designed to be used as a FastAPI dependency.
     
     Yields:
-        Session: SQLAlchemy database session
+        Session: SQLModel database session
         
     Example:
         @app.get("/items/")
-        def read_items(db: Session = Depends(get_db)):
-            return db.query(Item).all()
+        def read_items(session: Session = Depends(get_session)):
+            return session.query(Item).all()
     """
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close() 
+    with Session(engine) as session:
+        try:
+            yield session
+        finally:
+            session.close() 

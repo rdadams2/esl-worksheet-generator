@@ -6,7 +6,7 @@ in the ESL Worksheet Generator application. It uses Pydantic for data validation
 
 from pydantic import BaseModel, UUID4
 from typing import List, Optional
-from datetime import datetime
+from datetime import datetime, date
 
 class StudentBase(BaseModel):
     """Base model for student information containing all shared attributes.
@@ -136,4 +136,24 @@ class Conversation(ConversationBase):
     created_at: datetime
 
     class Config:
-        orm_mode = True 
+        orm_mode = True
+
+class BasicInfoResponse(BaseModel):
+    date_of_birth: date
+    email: str
+    phone: str
+    native_language: str
+    current_address: str
+
+class StudentDetailResponse(BaseModel):
+    student_id: int
+    first_name: str
+    last_name: str
+    proficiency_level: str
+    profile_image_url: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    basic_info: Optional[BasicInfoResponse] = None
+
+    class Config:
+        from_attributes = True 
