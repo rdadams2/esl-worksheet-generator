@@ -74,8 +74,9 @@ function App() {
     <div className="min-h-screen bg-[#f0f4f8]">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
-        <div className="container flex h-16 max-w-screen-2xl items-center">
+        <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
           <h1 className="text-2xl font-semibold text-[#1a365d]">ESL Worksheet Generator</h1>
+          <a href="/about" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">About Us</a>
         </div>
       </header>
 
