@@ -14,11 +14,12 @@ from app.db.models import (
     InterestHobby, LearningContext, CulturalElements, SocialAspects,
     Interview, InterviewTemplate
 )
-from app.core.dependencies import get_student_extraction_service
+from app.core.dependencies import get_student_extraction_service, get_current_active_user
 from app.services.student_extractor import StudentExtractionService
 from app.api.models.transcription import TranscriptionCreate
 from app.api.models.student import StudentDetailResponse
-from app.api.routes import worksheets
+from app.api.routes import worksheets, auth
+from app.db.models import User
 
 app = FastAPI(
     title="ESL Worksheet Generator API",
@@ -28,12 +29,14 @@ app = FastAPI(
 
 # Include routers
 app.include_router(worksheets.router, tags=["worksheets"])
+app.include_router(auth.router)
 
 @app.post("/transcriptions/", response_model=Dict[str, Any])
 async def process_transcription(
     transcription_data: TranscriptionCreate,
     service: StudentExtractionService = Depends(get_student_extraction_service),
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_user)
 ) -> Dict[str, Any]:
     """Process a transcription to extract student information.
     
@@ -41,6 +44,7 @@ async def process_transcription(
         transcription_data: Transcription data
         service: Student extraction service
         session: Database session
+        current_user: Current authenticated user
         
     Returns:
         Dict[str, Any]: Processed student information
@@ -70,7 +74,8 @@ async def process_transcription(
 def get_students(
     skip: int = 0,
     limit: int = 100,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_user)
 ) -> List[StudentDetailResponse]:
     """Get a list of students with their basic information.
     
@@ -78,6 +83,7 @@ def get_students(
         skip: Number of records to skip
         limit: Maximum number of records to return
         session: Database session
+        current_user: Current authenticated user
         
     Returns:
         List[StudentDetailResponse]: List of student records with basic information
@@ -89,13 +95,15 @@ def get_students(
 @app.get("/students/{student_id}", response_model=StudentDetailResponse)
 def get_student(
     student_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_user)
 ) -> StudentDetailResponse:
     """Get detailed information about a student.
     
     Args:
         student_id: Student ID
         session: Database session
+        current_user: Current authenticated user
         
     Returns:
         StudentDetailResponse: Student record with basic information
@@ -118,13 +126,15 @@ def get_student(
 @app.get("/students/{student_id}/interviews", response_model=List[Interview])
 def get_student_interviews(
     student_id: int,
-    session: Session = Depends(get_session)
+    session: Session = Depends(get_session),
+    current_user: User = Depends(get_current_active_user)
 ) -> List[Interview]:
     """Get all interviews for a student.
     
     Args:
         student_id: Student ID
         session: Database session
+        current_user: Current authenticated user
         
     Returns:
         List[Interview]: List of interview records

@@ -242,4 +242,27 @@ class ActivityGroup(SQLModel, table=True):
     student_2: Student = Relationship(
         back_populates="activity_groups_as_student_2",
         sa_relationship_kwargs={"foreign_keys": "[ActivityGroup.student_id_2]"}
+    )
+
+class User(SQLModel, table=True):
+    """User model for authentication."""
+    user_id: Optional[int] = Field(default=None, primary_key=True)
+    email: str = Field(unique=True, index=True)
+    username: str = Field(unique=True, index=True)
+    hashed_password: str
+    is_active: bool = Field(default=True)
+    is_superuser: bool = Field(default=False)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Optional relationship to Student if the user is a student
+    student_id: Optional[int] = Field(default=None, foreign_key="student.student_id")
+    student: Optional[Student] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[User.student_id]"}
+    )
+    
+    # Optional relationship to Professor if the user is a professor
+    professor_id: Optional[int] = Field(default=None, foreign_key="professor.professor_id")
+    professor: Optional[Professor] = Relationship(
+        sa_relationship_kwargs={"foreign_keys": "[User.professor_id]"}
     ) 

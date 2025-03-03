@@ -1,8 +1,10 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import ConversationGuide from './components/ConversationGuide';
 import StudentForm from './components/StudentForm';
 import { StudentProfile } from './components/StudentProfile';
 import StudentProfileEditor from './components/StudentProfileEditor';
+import { useAuth } from './lib/auth';
 
 /**
  * Demo student data for development and testing purposes.
@@ -70,13 +72,38 @@ const demoStudent = {
  * - Footer: App information
  */
 function App() {
+  const { user, isAuthenticated, logout } = useAuth();
+  
   return (
     <div className="min-h-screen bg-[#f0f4f8]">
       {/* Sticky Header */}
       <header className="sticky top-0 z-50 w-full border-b bg-white shadow-sm">
         <div className="container flex h-16 max-w-screen-2xl items-center justify-between">
           <h1 className="text-2xl font-semibold text-[#1a365d]">ESL Worksheet Generator</h1>
-          <a href="/about" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">About Us</a>
+          <div className="flex items-center space-x-4">
+            <Link to="/about" className="text-[#4a5568] hover:text-[#2d3748]">About Us</Link>
+            
+            {isAuthenticated ? (
+              <>
+                <Link to="/profile" className="text-[#4a5568] hover:text-[#2d3748]">
+                  {user?.username || 'Profile'}
+                </Link>
+                <button 
+                  onClick={() => logout()}
+                  className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link to="/login" className="text-[#4a5568] hover:text-[#2d3748]">Login</Link>
+                <Link to="/register" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+                  Register
+                </Link>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
