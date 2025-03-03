@@ -2,6 +2,7 @@ import React from 'react';
 import ConversationGuide from './components/ConversationGuide';
 import StudentForm from './components/StudentForm';
 import { StudentProfile } from './components/StudentProfile';
+import StudentProfileEditor from './components/StudentProfileEditor';
 
 /**
  * Demo student data for development and testing purposes.
@@ -116,6 +117,16 @@ function App() {
                 student={demoStudent}
                 profileImage="https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop"
               />
+            </div>
+          </section>
+
+          {/* Student Profile Editor Section - Full Width */}
+          <section className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h2 className="text-2xl font-semibold text-[#1a365d]">Student Profile Editor</h2>
+            </div>
+            <div className="w-full bg-white p-6 rounded-lg border border-[#e2e8f0] shadow-sm hover:shadow-md transition-shadow duration-300">
+              <StudentProfileEditor studentId="demo" /> {/* Using "demo" as a placeholder ID */}
             </div>
           </section>
         </div>
