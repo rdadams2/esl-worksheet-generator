@@ -121,7 +121,7 @@ The server will start at http://127.0.0.1:8001 with auto-reload enabled.
 1. Create test data:
 ```bash
 cd backend
-PYTHONPATH=$PWD python create_test_data.py
+uvicorn app.api.main:app --reload --port 8001
 ```
 
 2. Test the API:
