@@ -9,7 +9,7 @@
 ## Database Schema Changes
 ## Replace all current models with the following SQLModel schema:
 
-```python
+python
 from typing import Optional, Dict, Any
 from datetime import datetime, date
 from sqlmodel import SQLModel, Field, Relationship
