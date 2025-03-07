@@ -7,7 +7,7 @@
 - Backend processes transcription and stores data
 
 ## Database Schema Changes
-Replace all current models with the following SQLModel schema:
+## Replace all current models with the following SQLModel schema:
 
 ```python
 from typing import Optional, Dict, Any
