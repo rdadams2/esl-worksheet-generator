@@ -10,10 +10,9 @@
 ## Replace all current models with the following SQLModel schema:
 
 python
-from typing import Optional, Dict, Any
-from datetime import datetime, date
-from sqlmodel import SQLModel, Field, Relationship
-from typing import List
+fastapi==0.70.0
+uvicorn==0.15.0
+sqlmodel==0.0.4
 
 # Base Tables
 class StudentBase(SQLModel):
